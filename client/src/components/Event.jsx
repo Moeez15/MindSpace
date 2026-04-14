@@ -1,58 +1,43 @@
-import React, { useState, useEffect } from 'react'
 import '../css/Event.css'
 
-const Event = (props) => {
+const formatTime = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
 
-    const [event, setEvent] = useState([])
-    const [time, setTime] = useState([])
-    const [remaining, setRemaining] = useState([])
+const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+}
 
-    useEffect(() => {
-        (async () => {
-            try {
-                const eventData = await EventsAPI.getEventsById(props.id)
-                setEvent(eventData)
-            }
-            catch (error) {
-                throw error
-            }
-        }) ()
-    }, [])
+const formatTimeRemaining = (dateString) => {
+    const eventTime = new Date(dateString).getTime()
+    const now = Date.now()
+    const diff = eventTime - now
 
-    useEffect(() => {
-        (async () => {
-            try {
-                const result = await dates.formatTime(event.time)
-                setTime(result)
-            }
-            catch (error) {
-                throw error
-            }
-        }) ()
-    }, [event])
+    if (diff < 0) {
+        const days = Math.floor(Math.abs(diff) / (1000 * 60 * 60 * 24))
+        return `Ended ${days} day${days !== 1 ? 's' : ''} ago`
+    }
 
-    useEffect(() => {
-        (async () => {
-            try {
-                const timeRemaining = await dates.formatRemainingTime(event.remaining)
-                setRemaining(timeRemaining)
-                dates.formatNegativeTimeRemaining(remaining, event.id)
-            }
-            catch (error) {
-                throw error
-            }
-        }) ()
-    }, [event])
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
 
+    if (days > 0) return `${days} day${days !== 1 ? 's' : ''} away`
+    if (hours > 0) return `${hours} hour${hours !== 1 ? 's' : ''} away`
+    return 'Starting soon!'
+}
+
+const Event = ({ id, title, date, image }) => {
     return (
         <article className='event-information'>
-            <img src={event.image} />
+            <img src={image} alt={title} />
 
             <div className='event-information-overlay'>
                 <div className='text'>
-                    <h3>{event.title}</h3>
-                    <p><i className="fa-regular fa-calendar fa-bounce"></i> {event.date} <br /> {time}</p>
-                    <p id={`remaining-${event.id}`}>{remaining}</p>
+                    <h3>{title}</h3>
+                    <p><i className="fa-regular fa-calendar fa-bounce"></i> {formatDate(date)} <br /> {formatTime(date)}</p>
+                    <p id={`remaining-${id}`}>{formatTimeRemaining(date)}</p>
                 </div>
             </div>
         </article>

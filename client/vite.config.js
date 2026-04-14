@@ -18,6 +18,12 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:3000'
+      },
+      '/events': {
+        target: 'http://localhost:3000'
+      },
+      '/moods': {
+        target: 'http://localhost:3000'
       }
     }
   }
